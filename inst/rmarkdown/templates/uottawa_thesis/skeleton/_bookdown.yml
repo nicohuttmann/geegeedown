@@ -1,0 +1,16 @@
+book_filename: "thesis"
+rmd_files: ["index.Rmd",
+  "sections/01-chap1.Rmd",
+  "sections/02-chap2.Rmd",
+  "sections/03-chap3.Rmd",
+  "sections/04-conclusion.Rmd",
+  "sections/98-references.Rmd",
+  "sections/99-appendix.Rmd"
+  ]
+chapter_name: "Chapter "
+download: [
+    ["thesis.pdf", "PDF"],
+    ["thesis.epub", "EPUB"],
+    ["thesis.docx", "Word"]
+  ]
+delete_merged_file: true
