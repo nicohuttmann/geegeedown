@@ -1,164 +1,168 @@
 #' Creates an R Markdown PDF Thesis document
 #'
-#' This is a function called in output in the YAML of the driver Rmd file
-#' to specify using the unofficial uOttawa Thesis LaTeX template and cls files from Wail Gueaieb.
+#' This is a function called in output in the YAML of the driver Rmd file to
+#' specify using the Heidelberg University template.
 #'
 #' @export
-#'
 #' @param toc A Boolean (TRUE or FALSE) specifying whether table of contents
-#'  should be created
+#' should be created
 #' @param toc_depth A positive integer
-#' @param ... Further arguments passed to or from other methods.
 #' @param highlight Syntax highlighting style. Supported styles include
 #' "default", "tango", "pygments", "kate", "monochrome", "espresso", "zenburn",
 #' and "haddock". Pass NULL to prevent syntax highlighting.
-#'
-#' @return A modified \code{pdf_document} based on the unofficial uOttawa Thesis LaTeX
-#'   template from Wail Gueaieb
+#' @param ... Additional parameters to pass to `pdf_book()`.
+#' @return A modified \code{pdf_document} based on the thesisdown template and
+#' the huwiwidown template.
 #' @examples
 #' \dontrun{
-#' output:geegeedown::thesis_pdf
+#'  output: heididown::thesis_pdf
 #' }
-thesis_pdf <- function(toc = TRUE, toc_depth = 3, highlight = "default", pandoc_args = NULL, ...) {
-  base <- bookdown::pdf_book(
-    template = "template.tex",
-    toc = toc,
-    toc_depth = toc_depth,
-    highlight = highlight,
-    keep_tex = TRUE,
-    pandoc_args = c(pandoc_args, "--top-level-division=chapter"),
-    ...
-  )
+thesis_pdf <- function(toc = TRUE, toc_depth = 3, highlight = "default", ...) {
 
-  # Mostly copied from knitr::render_sweave
-  base$knitr$opts_chunk$comment <- NA
-  # base$knitr$opts_chunk$fig.align <- "center"
-
-  old_opt <- getOption("bookdown.post.latex")
-  options(bookdown.post.latex = fix_envs)
-  on.exit(options(bookdown.post.late = old_opt))
-
-  base
-}
-
-#' Creates an R Markdown gitbook Thesis document
-#'
-#' This is a function called in output in the YAML of the driver Rmd file
-#' to specify the creation of a webpage version of the thesis.
-#'
-#' @param ... Further arguments passed to or from other methods.
-#'
-#' @export
-#' @return A gitbook webpage
-#' @examples
-#' \dontrun{
-#' output:geegeedown::thesis_gitbook
-#' }
-thesis_gitbook <- function(...) {
-  config_default <- list(
-    toc = list(
-      collapse = "section",
-      before = '<li><a href="./"></a></li>',
-      after = paste(
-        '<li><a href="https://github.com/rstudio/bookdown',
-        'target="blank">Published with bookdown</a></li>'
-      )
+    base <- bookdown::pdf_book(
+        template    = "template.tex",
+        toc         = toc,
+        toc_depth   = toc_depth,
+        highlight   = highlight,
+        keep_tex    = TRUE,
+        pandoc_args = "--top-level-division=chapter",
+        ...
     )
-  )
 
-  listarg <- list(...)
+    # Mostly copied from knitr::render_sweave
+    base$knitr$opts_chunk$comment   <- NA
 
-  if (!"split_by" %in% names(listarg)) {
-    listarg$split_by <- "chapter+number"
-  }
+    # To ensure images are in correct place (in line with text)
+    base$knitr$opts_chunk$fig.align <- "center"
+    # base$knitr$opts_chunk$fig.pos    <- "H"
+    # base$knitr$opts_chunk$out.extra  <- ""
 
-  if (!"config" %in% names(listarg)) {
-    listarg$config <- config_default
-  } else {
-    if (!"toc" %in% names(listarg$config)) {
-      listarg$config$toc <- config_default$toc
-    } else {
-      if (!"collapse" %in% names(listarg$config$toc)) {
-        listarg$config$toc$collapse <- config_default$toc$collapse
-      }
-      if (!"before" %in% names(listarg$config$toc)) {
-        listarg$config$toc$before <- config_default$toc$before
-      }
-      if (!"after" %in% names(listarg$config$toc)) {
-        listarg$config$toc$after <- config_default$toc$after
-      }
-    }
-  }
+    # For tables
+    options(knitr.table.format = "latex")
+    options(kableExtra.latex.load_packages = FALSE)
 
-  base <- do.call(bookdown::gitbook, listarg)
+    old_opt <- getOption("bookdown.post.latex")
+    options(bookdown.post.latex = fix_envs)
+    on.exit(options(bookdown.post.late = old_opt))
 
-  # Mostly copied from knitr::render_sweave
-  base$knitr$opts_chunk$comment <- NA
-  base$knitr$opts_chunk$fig.align <- "center"
-
-  base
+    return(base)
 }
 
-#' Creates an R Markdown Word Thesis document
+#' Creates an R Markdown PDF Thesis document without chapters
 #'
-#' This is a function called in output in the YAML of the driver Rmd file
-#' to specify the creation of a Microsoft Word version of the thesis.
-#'
-#' @param ... Further arguments passed to or from other methods.
+#' This is a function called in output in the YAML of the driver Rmd file to
+#' specify using the Heidelberg University template.
 #'
 #' @export
-#' @return A Word Document based on (hopefully soon, but not currently)
-#' the Reed Senior Thesis Word template
+#' @param toc A Boolean (TRUE or FALSE) specifying whether table of contents
+#' should be created
+#' @param toc_depth A positive integer
+#' @param highlight Syntax highlighting style. Supported styles include
+#' "default", "tango", "pygments", "kate", "monochrome", "espresso", "zenburn",
+#' and "haddock". Pass NULL to prevent syntax highlighting.
+#' @param ... Additional parameters to pass to `pdf_book()`.
+#' @return A modified \code{pdf_document} based on the HU Berlin School of
+#' Business and Economics LaTeX template.
 #' @examples
 #' \dontrun{
-#' output:geegeedown::thesis_word
+#'  output: heididown::thesis_without_chapter_pdf
 #' }
-thesis_word <- function(...) {
-  base <- bookdown::word_document2(...)
+thesis_without_chapter_pdf <- function(toc = TRUE, toc_depth = 3, highlight = "default", ...) {
 
-  # Mostly copied from knitr::render_sweave
-  base$knitr$opts_chunk$comment <- NA
-  base$knitr$opts_chunk$fig.align <- "center"
+    base <- bookdown::pdf_book(
+        template    = "template_wo_chap.tex",
+        toc         = toc,
+        toc_depth   = toc_depth,
+        highlight   = highlight,
+        keep_tex    = TRUE,
+        pandoc_args = "--top-level-division=section",
+        ...
+    )
 
-  base
+    # Mostly copied from knitr::render_sweave
+    base$knitr$opts_chunk$comment   <- NA
+
+    # To ensure images are in correct place (in line with text)
+    base$knitr$opts_chunk$fig.align <- "center"
+    # base$knitr$opts_chunk$fig.pos    <- "H"
+    # base$knitr$opts_chunk$out.extra  <- ""
+
+    # For tables
+    options(knitr.table.format = "latex")
+    options(kableExtra.latex.load_packages = FALSE)
+
+    old_opt <- getOption("bookdown.post.latex")
+    options(bookdown.post.latex = fix_envs)
+    on.exit(options(bookdown.post.late = old_opt))
+
+    return(base)
 }
 
-#' Creates an R Markdown epub Thesis document
+#' Creates an R Markdown PDF Thesis document without chapters for submission
+#' of a bachelor/master thesis to IPMB
 #'
-#' This is a function called in output in the YAML of the driver Rmd file
-#' to specify the creation of a epub version of the thesis.
-#'
-#' @param ... Further arguments passed to or from other methods.
+#' This is a function called in output in the YAML of the driver Rmd file to
+#' specify using the Heidelberg University template.
 #'
 #' @export
-#' @return A ebook version of the thesis
+#' @param toc A Boolean (TRUE or FALSE) specifying whether table of contents
+#' should be created
+#' @param toc_depth A positive integer
+#' @param highlight Syntax highlighting style. Supported styles include
+#' "default", "tango", "pygments", "kate", "monochrome", "espresso", "zenburn",
+#' and "haddock". Pass NULL to prevent syntax highlighting.
+#' @param ... Additional parameters to pass to `pdf_book()`.
+#' @return A modified \code{pdf_document} based on the HU Berlin School of
+#' Business and Economics LaTeX template.
 #' @examples
 #' \dontrun{
-#' output:geegeedown::thesis_epub
+#'  output: heididown::thesis_without_chapter_ipmb_pdf
 #' }
-thesis_epub <- function(...) {
-  base <- bookdown::epub_book(...)
+thesis_without_chapter_ipmb_pdf <- function(toc = TRUE, toc_depth = 3, highlight = "default", ...) {
 
-  # Mostly copied from knitr::render_sweave
-  base$knitr$opts_chunk$comment <- NA
-  base$knitr$opts_chunk$fig.align <- "center"
+    base <- bookdown::pdf_book(
+        template    = "template_wo_chap_ipmb.tex",
+        toc         = toc,
+        toc_depth   = toc_depth,
+        highlight   = highlight,
+        keep_tex    = TRUE,
+        pandoc_args = "--top-level-division=section",
+        ...
+    )
 
-  base
+    # Mostly copied from knitr::render_sweave
+    base$knitr$opts_chunk$comment   <- NA
+
+    # To ensure images are in correct place (in line with text)
+    base$knitr$opts_chunk$fig.align <- "center"
+    # base$knitr$opts_chunk$fig.pos    <- "H"
+    # base$knitr$opts_chunk$out.extra  <- ""
+
+    # For tables
+    options(knitr.table.format = "latex")
+    options(kableExtra.latex.load_packages = FALSE)
+
+    old_opt <- getOption("bookdown.post.latex")
+    options(bookdown.post.latex = fix_envs)
+    on.exit(options(bookdown.post.late = old_opt))
+
+    return(base)
 }
 
-fix_envs <- function(x) {
-  beg_reg <- "^\\s*\\\\begin\\{.*\\}"
-  end_reg <- "^\\s*\\\\end\\{.*\\}"
-  i3 <- if (length(i1 <- grep(beg_reg, x))) {
-    (i1 - 1)[grepl("^\\s*$", x[i1 - 1])]
-  }
-
-  i3 <- c(
-    i3,
-    if (length(i2 <- grep(end_reg, x))) {
-      (i2 + 1)[grepl("^\\s*$", x[i2 + 1])]
+fix_envs = function(x) {
+    beg_reg <- '^\\s*\\\\begin\\{.*\\}'
+    end_reg <- '^\\s*\\\\end\\{.*\\}'
+    i3      <- if (length(i1 <- grep(beg_reg, x))) {
+        (i1 - 1)[grepl("^\\s*$", x[i1 - 1])]
     }
-  )
-  if (length(i3)) x <- x[-i3]
-  x
+    i3      <- c(
+        i3,
+        if (length(i2 <- grep(end_reg, x))) {
+            (i2 + 1)[grepl("^\\s*$", x[i2 + 1])]
+        }
+    )
+    if (length(i3)) {
+        x <- x[-i3]
+    }
+    return(x)
 }

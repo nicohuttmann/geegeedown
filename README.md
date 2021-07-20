@@ -1,205 +1,155 @@
+# heididown 
+[![Build Status](https://travis-ci.org/nkurzaw/heididown.svg?branch=master)](https://travis-ci.org/nkurzaw/heididown)
 
-<!-- README.md is generated from README.Rmd via `devtools::build_readme()`. Please edit README.Rmd -->
+The `heididown` package provides a handy template for writing a dissertation 
+at the Faculty of Biosciences at Heidelberg University and rendering
+those files in a PDF format following the instructions given 
+[here](https://www.bio.uni-heidelberg.de/fakultaetbio/en/phd_submission).
+It is heavily based on Phi Nguyen's [huwiwidown](https://github.com/phister/huwiwidown)
+for writing a dissertation at  the Humboldt-Universität zu Berlin School of 
+Business and Economics which in turn is based on Chester Ismay's 
+[thesisdown](https://github.com/ismayc/thesisdown).
 
-# geegeedown <img src="man/figures/thesisdown_hex.png" align="right" width=200 />
+Users write in `R Markdown` (which is basically a flavor of the `Markdown`
+markup language but with the ability to incorporate R code chunks using the
+`knitr` package), and the `bookdown` package (powered by
+[pandoc](https://pandoc.org) ) is used to convert the code into LaTeX code and
+finally into a PDF document. There's other formats that can be created too, such
+as html documents, but that is outside the scope of this package.
 
-This project was inspired by the
-[bookdown](https://github.com/rstudio/bookdown) package and is an
-updated version of my Senior Thesis template in the `reedtemplates`
-package [here](https://github.com/ismayc/reedtemplates). It was
-originally designed to only work with the Reed College LaTeX template,
-but has since been adapted to work with many different institutions by
-many different individuals. Check out the [**Customizing thesisdown to
-your
-institution**](https://github.com/ismayc/thesisdown#customizing-thesisdown-to-your-institution)
-section below for examples.
+In the event that you've never used `bookdown` before, check out this [handy
+tutorial](https://bookdown.org/yihui/bookdown/).
 
-Currently, the PDF and gitbook versions are fully-functional. The word
-and epub versions are developmental, have no templates behind them, and
-are essentially calls to the appropriate functions in bookdown.
+## Introduction
 
-If you are new to working with `bookdown`/`rmarkdown`, please read over
-the documentation available in the `gitbook` template at
-<https://ismayc.github.io/thesisdown_book>.
+Why use this instead of the provided LaTeX template? Though LaTeX is an
+incredibly powerful tool, the learning curve can be difficult and a lot of time
+is spent wasted on finding the correct formatting. This package sacrifices
+some of the expressiveness of LaTeX for the ease of use of Markdown, to allow
+the end user to focus on writing good content.
 
-The current output for the four versions is here:
+Markdown is a much easier-to-use, lightweight, no-frills markup language. The
+good news is that users can still inject LaTeX code directly into the Markdown
+pages, in the event he/she still wants to write in LaTeX.
 
--   [PDF](https://github.com/ismayc/thesisdown_book/blob/master/thesis.pdf)
-    (Generating LaTeX file is available
-    [here](https://github.com/ismayc/thesisdown_book/blob/master/thesis.tex)
-    with other files in the [book
-    directory](https://github.com/ismayc/thesisdown_book/tree/master).)
--   [Word](https://github.com/ismayc/thesisdown_book/blob/master/thesis.docx)
--   [ePub](https://github.com/ismayc/thesisdown_book/blob/master/thesis.epub)
--   [gitbook](https://ismayc.github.io/thesisdown_book)
+This thesis will contain minor differences to the due to limitations in the
+pandoc output, but in general the appearance is almost entirely identical. An
+example of the output can be seen [here](thesis-example.pdf).
 
-Under the hood, the Reed College LaTeX template is used to ensure that
-documents conform precisely to submission standards. At the same time,
-composition and formatting can be done using lightweight
-[markdown](https://rmarkdown.rstudio.com/authoring_basics.html) syntax,
-and **R** code and its output can be seamlessly included using
-[rmarkdown](https://rmarkdown.rstudio.com).
+## Usage
 
-### Using thesisdown from Chester’s GitHub
+### Initial Setup
 
-Special thanks to [Ben Marwick](https://github.com/benmarwick) for
-helping to add a lot more clarity to the directions below from the
-[README of his spin-off `huskydown`
-package](https://github.com/benmarwick/huskydown/blob/master/README.md).
+1. To install the template, be sure you have the following:
+    - [pandoc](http://pandoc.org/)
+    - [LaTeX](https://www.latex-project.org/get/)
+    - [R >= 3.6](https://r-project.org)
+    - [RStudio](https://rstudio.org) (optional, but it helps)
+2. Install the necessary packages:
 
-Using {thesisdown} has some prerequisites which are described below. To
-compile PDF documents using **R**, you are going to need to have LaTeX
-installed. By far the easiest way to install LaTeX on any platform is
-with the [tinytex](https://yihui.name/tinytex/) R package:
+```r
+if (!require("devtools")) {
+  install.packages("devtools", repos = "http://cran.rstudio.org")
+}
+devtools::install_github("rstudio/bookdown")
+devtools::install_github("nkurzaw/heididown")
+```
+3. Create a New R Markdown document:
 
-``` r
-install.packages(c('tinytex', 'rmarkdown'))
-tinytex::install_tinytex()
-# after restarting RStudio, confirm that you have LaTeX with
-tinytex:::is_tinytex()
+File -> New File -> R Markdown... then choose 'From template', then choose
+'Heidelberg Thesis", and enter `index` as the **Name**. Note that this will 
+currently only **Knit** if you name the directory `index` at this step.
+
+<p align="center">
+  <img src="from_template.png" width="400px">
+</p>
+
+If you're not using RStudio, navigate to an empty directory and then run the
+following code:
+
+```r
+rmarkdown::draft("index.Rmd", template = "heidelberg_thesis", package = "heididown")
 ```
 
-You may need to install a few extra LaTeX packages on your first attempt
-to knit as well. Here is one such example of how to do so:
+4. Choose a document style you prefer 
 
-``` r
-tinytex::tlmgr_install("babel-portuges")
+The package comes with multiple options to render documents:
+- create a book-like pdf appearance with chapters (default, which I personally prefer for dissertations),
+    - this is done usind the function `heididown::thesis_pdf`(default)
+    - to adapt the underlying template, you have to modify the `template.tex` file
+- create a pdf with sections as highest level organization
+    -  this is done usind the function `heididown::thesis_without_chapter_pdf` which you specify in the `index.Rmd` file (see image below) 
+    - to adapt the underlying template, you have to modify the `template_wo_chap.tex` file
+- create a pdf with sections as a template for a master of bachelor thesis at the Institute of Pharmacy and Molecular Biotechnology
+    - this is done usind the function `heididown::thesis_without_chapter_ipmb_pdf` which you need to specify in the `index.Rmd` file (see image below)
+    - to adapt the underlying template, you have to modify the `template_wo_chap_ipmb.tex` file
+
+
+<p align="center">
+  <img src="change_rendering_function.png" width="400px">
+</p>
+
+All options come with no warranty that the output style is in accordance with what the 
+faculty you are submitting your thesis to will accept!! Carefully check if all formal requirements are fullfilled! 
+If you need to adjust things, you can always edit the latex template files underlying the different functions.
+
+### Rendering
+
+To render your thesis, you can open `index.Rmd` in RStudio and then hit the
+"knit" button. Alternatively, you can use:
+
+```r
+rmarkdown::render("index.Rmd")
 ```
 
-To use {thesisdown} from
-[RStudio](https://www.rstudio.com/products/rstudio/download/):
-
-1.  Ensure that you have already installed LaTeX and the fonts described
-    above, and are using the latest version of
-    [RStudio](https://www.rstudio.com/products/rstudio/download/). You
-    can use `thesisdown` without RStudio. For example, you can write the
-    Rmd files in your favorite text editor
-    (e.g. [Atom](https://atom.io/),
-    [Notepad++](https://notepad-plus-plus.org/)). But RStudio is
-    probably the easiest tool for writing both R code and text in your
-    thesis. It also provides a nice way to build your thesis while
-    editing. We’ll proceed assuming that you have decided to use the
-    RStudio workflow.
-
-2.  Install the {bookdown} and {thesisdown} packages. Note that
-    {thesisdown} is not available on CRAN at the moment and that’s why
-    `install.packages("thesisdown")` won’t work. Use
-    `remotes::install_github()` as shown below instead to install the
-    package.
-
-    ``` r
-    if (!require("remotes")) 
-      install.packages("remotes", repos = "https://cran.rstudio.org")
-    remotes::install_github("rstudio/bookdown")
-    remotes::install_github("ismayc/thesisdown")
-    ```
-
-          Note that you may need to restart RStudio at this point for
-the following dialog to show up.
-
-3.  Get started with the {thesisdown} template. There are two options
-    for doing so.
-
--   3a) **RECOMMENDED** Create a new RStudio project with a {thesisdown}
-    template.
-
-    In RStudio, click on **File** &gt; **New Project** &gt; **New
-    Directory**. Then select **Thesis Project using thesisdown** from
-    the dropdown that will look something like the image below. You’ll
-    see the graduation cap as the icon on the left for the appropriate
-    project type.
-
-    ![](https://raw.githubusercontent.com/ismayc/thesisdown/master/docs/reference/figures/thesis_proj.png)
-
-    Next, give your project a name and specify where you’d like the
-    files to appear. In the screenshot below, the project name is
-    `my_thesis` and it will appear as a new folder on my Desktop.
-
-    ![](https://raw.githubusercontent.com/ismayc/thesisdown/master/docs/reference/figures/thesis_proj_name.png)
-
-    If you got this far, skip over step 3b which is the older version of
-    getting the template. It might force you to change some of the
-    directories to get knitting to work and has some other limitations
-    as well. That’s why step 3a is recommended.
-
--   3b) Use the **New R Markdown** dialog to select **Thesis**:
-
-    ![](https://raw.githubusercontent.com/ismayc/thesisdown/master/docs/reference/figures/thesis_rmd.png)
-
-    Note that this will currently only **Knit** if you name the
-    directory `index` as shown above. This guarantees that `index.html`
-    is generated correctly for the Gitbook version of the thesis.
-
-4.  After choosing which type of output you’d like in the YAML at the
-    top of `index.Rmd`, **Knit** the `index.Rmd` file to get the book in
-    PDF or HTML formats.
-
-### Day-to-day writing of your thesis
-
-You need to edit the individual chapter R Markdown files to write your
-thesis. It’s recommended that you version control your thesis using
-GitHub if possible. RStudio can also easily sync up with GitHub to make
-the process easier. While writing, you should `git commit` your work
-frequently, after every major activity on your thesis. For example,
-every few paragraphs or section of text, and after major step of
-analysis development. You should `git push` at the end of each work
-session before you leave your computer or change tasks. For a gentle,
-novice-friendly guide to getting starting with using Git with R and
-RStudio, see <https://happygitwithr.com/>.
-
-## Rendering
-
-To render your thesis into a PDF, open `index.Rmd` in RStudio and then
-click the “knit” button. To change the output formats between PDF,
-gitbook and Word, look at the `output:` field in `index.Rmd` and
-comment-out the formats you don’t want.
-
-The PDF file of your thesis will be deposited in the `_book/` directory,
-by default.
+Your thesis will be deposited in the `thesis-output/` directory.
 
 ## Components
 
-The following components are ones you should edit to customize your
-thesis:
-
-### `_bookdown.yml`
-
-This is the main configuration file for your thesis. You can change the
-name of your outputted file here for your thesis and other options about
-your thesis here.
+The following describes the components in the template.
 
 ### `index.Rmd`
 
-This file contains all the meta information that goes at the beginning
-of your document. You’ll need to edit the top portion of this file (the
-YAML) to put your name on the first page, the title of your thesis, etc.
-Note that you need to have at least one chapter start in the `index.Rmd`
-file for the build to work. For the template, this is done with
-`# Introduction` in the example from the template.
+This file is first created when generating a new template. It contains all the
+relevant meta-information (e.g. name, thesis title, advisor names). You will
+need to fill out the sections at the top of the page, which will then
+auto-populate your "Title Page" and "Declaration of Authorship". If you are also
+familiar with the YAML header, you can also add additional LaTeX parameters or
+decide whether you want to add optional pages to your thesis such as the
+"Acknowledgements" section or the "List of Tables".
 
-### `01-chap1.Rmd`, `02-chap2.Rmd`, etc.
+### `_bookdown.yml`
 
-These are the Rmd files for each chapter in your dissertation. Write
-your thesis in these. If you’re writing in RStudio, you may find the
-[wordcount addin](https://github.com/benmarwick/wordcountaddin) useful
-for getting word counts and readability statistics in R Markdown
-documents.
+This is the main configuration file for your thesis. It determines what Rmd
+files are included in the output, and in what order. Arrange the order of your
+chapters in this file and ensure that the names match the names in your folders.
+The first file should always be the `index.Rmd` file. The rest will be the files
+that you create. Some example files are already included to help you along your
+way.
+
+### `sections/`
+
+These are the sections or chapters that will be bound together in the final
+render. Here's where you write the sections that make your thesis. You can name
+the files whatever you like, so long as they are indexed in the `_bookdown.yml`
+file.
+
+Note that you will not need to change `98-references.Rmd` as the bibliography
+will be auto-generated in alphabetically order so long as you cite that item
+in the text and your bibliography is correctly located in `bib/references.bib`.
+References should stay in that position to ensure it appears after the text but
+before the appendix.
 
 ### `bib/`
 
-Store your bibliography (as bibtex files) here. We recommend using the
-[citr addin](https://github.com/crsh/citr) and
-[Zotero](https://www.zotero.org/) to efficiently manage and insert
-citations.
+Store your bibliography (as `bibtex` files) here.
 
-### `csl/`
+### `figures/` and `data/`
 
-Specific style files for bibliographies should be stored here. A good
-source for citation styles is
-<https://github.com/citation-style-language/styles#readme>.
+Store your figures and data here and reference them in your R Markdown files.
 
-### `figure/` and `data/`
+## Further Resources
 
-Store your figures and data here and reference them in your R Markdown
-files. See the [bookdown book](https://bookdown.org/yihui/bookdown/) for
-details on cross-referencing items using R Markdown.
+1. Chester Ismay's `thesisdown` package: [thesisdown](https://github.com/ismayc/thesisdown)
+2. Basic R Markdown syntax: [R Markdown](https://rmarkdown.rstudio.com/authoring_basics.html)
+3. R Markdown reference guide: [R Markdown Reference](https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf)
